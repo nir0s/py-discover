@@ -29,7 +29,9 @@ class AWS(object):
             region_name=conn.get('region'))
         self.ec2client = session.client('ec2')
 
-    def nodes(self, tag_key, tag_value):
+    def nodes(self, tag_key, tag_value, param='PrivateIpAddress'):
+        param = param or 'PrivateIpAddress'
+
         response = self.ec2client.describe_instances(
             Filters=[
                 {
@@ -41,7 +43,11 @@ class AWS(object):
         instancelist = []
         for reservation in (response["Reservations"]):
             for instance in reservation["Instances"]:
-                instancelist.append(instance["PrivateIpAddress"])
+                if param not in instance:
+                    raise PyDiscoverError(
+                        'Key {0} does not exist. '
+                        'Available params are {1}'.format(param, instance.keys()))
+                instancelist.append(instance[param])
         return instancelist
 
 
@@ -60,7 +66,8 @@ def _assert_required_params_passed(kwargs):
 def nodes(provider, **kwargs):
     _assert_required_params_passed(kwargs)
     discover = PROVIDER_MAPPING[provider](kwargs)
-    return discover.nodes(kwargs['tag_key'], kwargs['tag_value'])
+    return discover.nodes(
+        kwargs['tag_key'], kwargs['tag_value'], kwargs.get('param'))
 
 
 class PyDiscoverError(Exception):
