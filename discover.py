@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
-
 import boto3
 
 
@@ -36,7 +34,11 @@ class AWS(object):
             Filters=[
                 {
                     'Name': 'tag:' + tag_key,
-                    'Values': [tag_value]
+                    'Values': [tag_value],
+                },
+                {
+                    'Name': 'instance-state-name',
+                    'Values': ['running']
                 }
             ]
         )
@@ -46,7 +48,8 @@ class AWS(object):
                 if param not in instance:
                     raise PyDiscoverError(
                         'Key {0} does not exist. '
-                        'Available params are {1}'.format(param, instance.keys()))
+                        'Available params are {1}'.format(
+                            param, instance.keys()))
                 instancelist.append(instance[param])
         return instancelist
 

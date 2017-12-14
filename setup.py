@@ -16,7 +16,7 @@ import os
 import codecs
 from setuptools import setup
 
-package_version = "0.1.0"
+package_version = "0.1.1"
 
 here = os.path.abspath(os.path.dirname(__file__))
 
